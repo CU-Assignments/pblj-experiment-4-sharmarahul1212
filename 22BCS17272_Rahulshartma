@@ -1,0 +1,156 @@
+ 1. Create a program to collect and store all the cards to assist the users in finding all the cards in a given symbol using Collection interface.       
+
+CODDE ->
+import java.util.*;
+
+// Card class to represent a playing card
+class Card {
+    private String symbol;
+    private String value;
+
+    public Card(String symbol, String value) {
+        this.symbol = symbol;
+        this.value = value;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return value + " of " + symbol;
+    }
+}
+
+// CardCollection class to store and retrieve cards
+class CardCollection {
+    private Collection<Card> cards;
+
+    public CardCollection() {
+        this.cards = new ArrayList<>();
+    }
+
+    public void addCard(Card card) {
+        cards.add(card);
+    }
+
+    public List<Card> findCardsBySymbol(String symbol) {
+        List<Card> result = new ArrayList<>();
+        for (Card card : cards) {
+            if (card.getSymbol().equalsIgnoreCase(symbol)) {
+                result.add(card);
+            }
+        }
+        return result;
+    }
+
+    public void displayAllCards() {
+        for (Card card : cards) {
+            System.out.println(card);
+        }
+    }
+}
+
+// Main class to demonstrate functionality
+public class CardCollectorApp {
+    public static void main(String[] args) {
+        CardCollection collection = new CardCollection();
+
+        // Adding some cards
+        collection.addCard(new Card("Hearts", "Ace"));
+        collection.addCard(new Card("Spades", "King"));
+        collection.addCard(new Card("Diamonds", "Queen"));
+        collection.addCard(new Card("Hearts", "10"));
+        collection.addCard(new Card("Clubs", "Jack"));
+
+        // Display all cards
+        System.out.println("All cards in collection:");
+        collection.displayAllCards();
+
+        // Find all cards with a given symbol
+        String searchSymbol = "Hearts";
+        System.out.println("\nCards with symbol '" + searchSymbol + "':");
+        List<Card> foundCards = collection.findCardsBySymbol(searchSymbol);
+        for (Card card : foundCards) {
+            System.out.println(card);
+        }
+    }
+}
+
+
+
+
+
+
+2.Develop a ticket booking system with synchronized threads to ensure no double booking of seats. Use thread priorities to simulate VIP bookings being processed first.
+
+ ->
+import java.util.*;
+
+class TicketBookingSystem {
+    private final int totalSeats;
+    private final Set<Integer> bookedSeats = new HashSet<>();
+
+    public TicketBookingSystem(int totalSeats) {
+        this.totalSeats = totalSeats;
+    }
+
+    public synchronized boolean bookSeat(int seatNumber, String passengerName) {
+        if (seatNumber < 1 || seatNumber > totalSeats) {
+            System.out.println(passengerName + " tried to book an invalid seat: " + seatNumber);
+            return false;
+        }
+        if (!bookedSeats.contains(seatNumber)) {
+            bookedSeats.add(seatNumber);
+            System.out.println(passengerName + " successfully booked seat " + seatNumber);
+            return true;
+        } else {
+            System.out.println(passengerName + " failed to book seat " + seatNumber + " (Already booked)");
+            return false;
+        }
+    }
+}
+
+class Passenger extends Thread {
+    private final TicketBookingSystem bookingSystem;
+    private final int seatNumber;
+    private final String passengerName;
+
+    public Passenger(TicketBookingSystem bookingSystem, int seatNumber, String passengerName, int priority) {
+        this.bookingSystem = bookingSystem;
+        this.seatNumber = seatNumber;
+        this.passengerName = passengerName;
+        setPriority(priority);
+    }
+
+    @Override
+    public void run() {
+        bookingSystem.bookSeat(seatNumber, passengerName);
+    }
+}
+
+public class TicketBookingApp {
+    public static void main(String[] args) {
+        TicketBookingSystem bookingSystem = new TicketBookingSystem(5);
+
+        Passenger vip1 = new Passenger(bookingSystem, 1, "VIP_John", Thread.MAX_PRIORITY);
+        Passenger vip2 = new Passenger(bookingSystem, 2, "VIP_Mary", Thread.MAX_PRIORITY);
+        Passenger normal1 = new Passenger(bookingSystem, 1, "Normal_Alex", Thread.MIN_PRIORITY);
+        Passenger normal2 = new Passenger(bookingSystem, 3, "Normal_Sam", Thread.NORM_PRIORITY);
+        Passenger normal3 = new Passenger(bookingSystem, 2, "Normal_Emma", Thread.NORM_PRIORITY);
+
+        vip1.start();
+        vip2.start();
+        normal1.start();
+        normal2.start();
+        normal3.start();
+    }
+}
+
+
+
